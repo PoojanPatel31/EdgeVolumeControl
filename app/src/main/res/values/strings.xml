@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Edge Volume Control</string>
+    <string name="label">Edge Volume Control</string>
+    <string name="description">Test for remoteview long click API</string>
+</resources>

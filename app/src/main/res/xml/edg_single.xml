@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cocktail-provider
+    category="normal"
+    label="@string/label"
+    previewImage="@mipmap/preview_image_temp"
+    cocktailWidth="550">
+</cocktail-provider>
