@@ -30,6 +30,8 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
         super.onReceive(context, intent);
         String action = intent.getAction();
 
+        getNotificationManager(context);
+
         switch (action) {
             case ACTION_REMOTE_CLICK:
                 performRemoteClick(context, intent);
@@ -60,9 +62,9 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
     @Override
     public void onEnabled(Context context) {
         super.onEnabled(context);
-        NotificationManager nm = getNotificationManager(context);
+        getNotificationManager(context);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                && !nm.isNotificationPolicyAccessGranted()) {
+                && !mNotificationManager.isNotificationPolicyAccessGranted()) {
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
             context.startActivity(intent);
             Toast.makeText(context, "Please allow Do Not Disturb permission", Toast.LENGTH_LONG).show();
@@ -80,28 +82,29 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
         int id = intent.getIntExtra("id", -1);
         switch (id) {
             case R.id.ringtone_plus:
-                changeVolume(am, AudioManager.STREAM_RING, AudioManager.ADJUST_RAISE, mRemoteViews, R.id.ringtone_level);
+                changeVolume(am, AudioManager.STREAM_RING, AudioManager.ADJUST_RAISE/*, mRemoteViews, R.id.ringtone_level*/);
                 updateUIRingerChange(am, mRemoteViews);
                 break;
 
             case R.id.ringtone_minus:
-                changeVolume(am, AudioManager.STREAM_RING, AudioManager.ADJUST_LOWER, mRemoteViews, R.id.ringtone_level);
+                changeVolume(am, AudioManager.STREAM_RING, AudioManager.ADJUST_LOWER/*, mRemoteViews, R.id.ringtone_level*/);
                 updateUIRingerChange(am, mRemoteViews);
                 break;
 
             case R.id.media_plus:
-                changeVolume(am, AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, mRemoteViews, R.id.media_level);
+                changeVolume(am, AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE/*, mRemoteViews, R.id.media_level*/);
                 updateUIMediaChange(am, mRemoteViews);
                 break;
 
             case R.id.media_minus:
-                changeVolume(am, AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, mRemoteViews, R.id.media_level);
+                changeVolume(am, AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER/*, mRemoteViews, R.id.media_level*/);
+                updateUIMediaChange(am, mRemoteViews);
                 break;
 
             case R.id.notification_plus:
                 if (am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE
                         && am.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
-                    changeVolume(am, AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_RAISE, mRemoteViews, R.id.notification_level);
+                    changeVolume(am, AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_RAISE/*, mRemoteViews, R.id.notification_level*/);
                     updateUINotificationChange(am, mRemoteViews);
                 }
                 break;
@@ -109,7 +112,7 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
             case R.id.notification_minus:
                 if (am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE
                         && am.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
-                    changeVolume(am, AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_LOWER, mRemoteViews, R.id.notification_level);
+                    changeVolume(am, AudioManager.STREAM_NOTIFICATION, AudioManager.ADJUST_LOWER/*, mRemoteViews, R.id.notification_level*/);
                     updateUINotificationChange(am, mRemoteViews);
                 }
                 break;
@@ -117,7 +120,7 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
             case R.id.system_plus:
                 if (am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE
                         && am.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
-                    changeVolume(am, AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_RAISE, mRemoteViews, R.id.system_level);
+                    changeVolume(am, AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_RAISE/*, mRemoteViews, R.id.system_level*/);
                     updateUISystemChange(am, mRemoteViews);
                 }
                 break;
@@ -125,15 +128,14 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
             case R.id.system_minus:
                 if (am.getRingerMode() != AudioManager.RINGER_MODE_VIBRATE
                         && am.getRingerMode() != AudioManager.RINGER_MODE_SILENT) {
-                    changeVolume(am, AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_LOWER, mRemoteViews, R.id.system_level);
+                    changeVolume(am, AudioManager.STREAM_SYSTEM, AudioManager.ADJUST_LOWER/*, mRemoteViews, R.id.system_level*/);
                     updateUISystemChange(am, mRemoteViews);
                 }
                 break;
 
             case R.id.ring_mode_button:
-                NotificationManager nm = getNotificationManager(context);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
-                        && nm.isNotificationPolicyAccessGranted()) {
+                        && mNotificationManager.isNotificationPolicyAccessGranted()) {
                     setRingerMode(am, mRemoteViews, R.id.ringer_mode_tv);
                 } else {
                     Toast.makeText(context, "Permission for notification access is required", Toast.LENGTH_SHORT).show();
@@ -170,23 +172,20 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
 
     }
 
-    private void changeVolume(AudioManager audioManager, int type, int volumelevel, RemoteViews remoteViews, int view) {
+    private void changeVolume(AudioManager audioManager, int type, int volumelevel/*, RemoteViews remoteViews, int view*/) {
         audioManager.adjustStreamVolume(type, volumelevel, 0);
-        remoteViews.setTextViewText(view, String.valueOf(audioManager.getStreamVolume(type)));
     }
 
     private void updateUIRingerChange(AudioManager audioManager, RemoteViews remoteViews) {
-
         if (audioManager.getStreamVolume(AudioManager.STREAM_RING) > 0 && audioManager.getStreamVolume(AudioManager.STREAM_RING) < 15) {
             setDefaultVolume(audioManager, AudioManager.STREAM_NOTIFICATION, mRemoteViews, R.id.notification_level);
             setDefaultVolume(audioManager, AudioManager.STREAM_SYSTEM, mRemoteViews, R.id.system_level);
             setDefaultVolume(audioManager, AudioManager.STREAM_RING, mRemoteViews, R.id.ringtone_level);
             setDefaultRingMode(audioManager, mRemoteViews);
-        } else if (audioManager.getMode() == AudioManager.RINGER_MODE_NORMAL
-                && audioManager.getStreamVolume(AudioManager.STREAM_RING) >= 15) {
+        } else if (audioManager.getStreamVolume(AudioManager.STREAM_RING) >= 15) {
             remoteViews.setTextViewText(R.id.ringtone_level, String.valueOf("Max"));
             setDefaultRingMode(audioManager, remoteViews);
-        }else if (audioManager.getStreamVolume(AudioManager.STREAM_RING) <= 0) {
+        } else if (audioManager.getStreamVolume(AudioManager.STREAM_RING) <= 0) {
             remoteViews.setTextViewText(R.id.ringtone_level, String.valueOf("Vibrate"));
             remoteViews.setTextViewText(R.id.notification_level, String.valueOf("Vibrate"));
             remoteViews.setTextViewText(R.id.system_level, String.valueOf("Vibrate"));
@@ -201,6 +200,8 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
             setDefaultVolume(audioManager, AudioManager.STREAM_MUSIC, mRemoteViews, R.id.media_level);
         } else if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) >= 15) {
             remoteViews.setTextViewText(R.id.media_level, String.valueOf("Max"));
+        } else if (audioManager.getStreamVolume(AudioManager.STREAM_MUSIC) <= 0) {
+            remoteViews.setTextViewText(R.id.media_level, String.valueOf("Min"));
         }
     }
 
@@ -243,7 +244,13 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
     }
 
     private void setDefaultVolume(AudioManager audioManager, int type, RemoteViews remoteViews, int view) {
-        remoteViews.setTextViewText(view, String.valueOf(audioManager.getStreamVolume(type)));
+        if (audioManager.getStreamVolume(type) > 0 && audioManager.getStreamVolume(type) < 15) {
+            remoteViews.setTextViewText(view, String.valueOf(audioManager.getStreamVolume(type)));
+        } else if (audioManager.getStreamVolume(type) <= 0) {
+            remoteViews.setTextViewText(view, "Min");
+        } else if (audioManager.getStreamVolume(type) >= 15) {
+            remoteViews.setTextViewText(view, "Max");
+        }
     }
 
     private void setDefaultRingMode(AudioManager audioManager, RemoteViews remoteViews) {
@@ -271,17 +278,13 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
             mRemoteViews = createRemoteView(context);
         }
 
+        getNotificationManager(context);
+
         AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
-//        setDefaultVolume(am, AudioManager.STREAM_RING, mRemoteViews, R.id.ringtone_level);
-//        setDefaultVolume(am, AudioManager.STREAM_MUSIC, mRemoteViews, R.id.media_level);
-//        setDefaultVolume(am, AudioManager.STREAM_NOTIFICATION, mRemoteViews, R.id.notification_level);
-//        setDefaultVolume(am, AudioManager.STREAM_SYSTEM, mRemoteViews, R.id.system_level);
-//        if (AudioManager.RINGER_MODE_NORMAL == am.getRingerMode()) {
-            updateUIRingerChange(am, mRemoteViews);
-            updateUINotificationChange(am, mRemoteViews);
-            updateUISystemChange(am, mRemoteViews);
-            updateUIMediaChange(am, mRemoteViews);
-//        }
+        updateUIRingerChange(am, mRemoteViews);
+        updateUINotificationChange(am, mRemoteViews);
+        updateUISystemChange(am, mRemoteViews);
+        updateUIMediaChange(am, mRemoteViews);
         setDefaultRingMode(am, mRemoteViews);
         cocktailManager.updateCocktail(cocktailIds[0], mRemoteViews);
     }
@@ -315,12 +318,8 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
                 PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-
-
-    private NotificationManager getNotificationManager(Context context) {
+    private void getNotificationManager(Context context) {
         if (mNotificationManager == null)
             mNotificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-        return mNotificationManager;
     }
 }
