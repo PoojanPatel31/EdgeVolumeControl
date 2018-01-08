@@ -3,8 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EdgeApp.iml" filepath="$PROJECT_DIR$/EdgeApp.iml" />
-      <module fileurl="file://$PROJECT_DIR$/EdgeVolumeControl.iml" filepath="$PROJECT_DIR$/EdgeVolumeControl.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://C:\Users\Poochi\AndroidStudioProjects\EdgeApp\EdgeVolumeControl.iml" filepath="C:\Users\Poochi\AndroidStudioProjects\EdgeApp\EdgeVolumeControl.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

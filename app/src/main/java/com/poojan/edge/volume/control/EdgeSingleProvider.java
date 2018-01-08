@@ -15,7 +15,7 @@ import com.samsung.android.sdk.look.cocktailbar.SlookCocktailManager;
 import com.samsung.android.sdk.look.cocktailbar.SlookCocktailProvider;
 
 /**
- * Created by Poochi on 5/27/2017.
+ * Created by Poojan on 5/27/2017.
  */
 
 public class EdgeSingleProvider extends SlookCocktailProvider {
