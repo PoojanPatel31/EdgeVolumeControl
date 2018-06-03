@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
-    android:gravity="bottom"
+    android:gravity="bottom|center_horizontal"
     android:orientation="vertical">
 
     <LinearLayout
@@ -162,6 +162,45 @@
     </LinearLayout>
 
     <TextView
+        style="@style/text_style"
+        android:text="Music Control"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal">
+
+        <ImageButton
+            android:id="@+id/play_previous_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_music_previous_next"
+            android:src="@mipmap/ic_play_previous" />
+
+        <ImageButton
+            android:id="@+id/play_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/button_bg_music_play_pause"
+            android:src="@mipmap/ic_play" />
+
+        <ImageButton
+            android:id="@+id/play_next_music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/button_bg_music_previous_next"
+            android:minWidth="1dp"
+            android:src="@mipmap/ic_play_next" />
+
+    </LinearLayout>
+
+    <TextView
         android:id="@+id/ringer_mode_tv"
         style="@style/text_style"
         android:layout_marginBottom="5dp"
@@ -172,6 +211,7 @@
         android:id="@+id/ring_mode_button"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
         android:background="@drawable/ring_mode_btn_bg"
         android:text="Ringer Mode"
         android:textColor="@android:color/white" />

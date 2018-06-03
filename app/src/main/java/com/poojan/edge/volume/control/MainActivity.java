@@ -39,14 +39,18 @@ public class MainActivity extends AppCompatActivity {
             mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    PackageManager packageManager = getPackageManager();
-                    ComponentName name = new ComponentName(MainActivity.this, MainActivity.class);
-                    if (isChecked) {
-                        packageManager.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
-                    } else {
-                        packageManager.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    try {
+                        PackageManager packageManager = getPackageManager();
+                        ComponentName name = new ComponentName(MainActivity.this, MainActivity.class);
+                        if (isChecked) {
+                            packageManager.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+                        } else {
+                            packageManager.setComponentEnabledSetting(name, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                        }
+                        Toast.makeText(MainActivity.this, "Please reboot the device", Toast.LENGTH_SHORT).show();
+                    } catch (Exception e) {
+                        e.printStackTrace();
                     }
-                    Toast.makeText(MainActivity.this, "Please reboot the device", Toast.LENGTH_SHORT).show();
                 }
             });
         } catch (Exception e) {
@@ -55,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
             }
             e.printStackTrace();
             mImageView.setImageDrawable(getDrawable(R.mipmap.ic_error));
-            mTextView.setText("Ops...!!!\nIt seems you device is not Samsung device or it does not support edge screen.");
+            mTextView.setText("Ops...!!!\nIt seems your device is not Samsung device or it does not support edge screen.");
             mCheckBox.setVisibility(View.GONE);
 
             PackageManager packageManager = getPackageManager();

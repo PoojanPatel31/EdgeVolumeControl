@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.view.KeyEvent;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
@@ -21,6 +22,7 @@ import com.samsung.android.sdk.look.cocktailbar.SlookCocktailProvider;
 public class EdgeSingleProvider extends SlookCocktailProvider {
 
     private static final String ACTION_REMOTE_CLICK = "com.example.cocktailslooksample.action.ACTION_REMOTE_CLICK";
+    public static final String ACTION_REMOTE_LONG_CLICK = "com.example.cocktailslooksample.action.ACTION_REMOTE_LONG_CLICK";
 
     private RemoteViews mRemoteViews;
     private NotificationManager mNotificationManager;
@@ -29,11 +31,15 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
     public void onReceive(Context context, Intent intent) {
         super.onReceive(context, intent);
         String action = intent.getAction();
-
+        AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         getNotificationManager(context);
 
         switch (action) {
             case ACTION_REMOTE_CLICK:
+                performRemoteClick(context, intent);
+                break;
+
+            case ACTION_REMOTE_LONG_CLICK:
                 performRemoteClick(context, intent);
                 break;
 
@@ -46,17 +52,16 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
                 SlookCocktailManager cocktailManager = SlookCocktailManager.getInstance(context);
                 int[] cocktailIds = cocktailManager.getCocktailIds(new ComponentName(context, EdgeSingleProvider.class));
 
-                AudioManager am = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
                 updateUIOnModeChange(am, mRemoteViews);
                 if (AudioManager.RINGER_MODE_NORMAL == am.getRingerMode()) {
                     updateUIRingerChange(am, mRemoteViews);
                     updateUINotificationChange(am, mRemoteViews);
                     updateUISystemChange(am, mRemoteViews);
                 }
-                cocktailManager.updateCocktail(cocktailIds[0], mRemoteViews);
+                if (cocktailIds != null)
+                    cocktailManager.updateCocktail(cocktailIds[0], mRemoteViews);
                 break;
         }
-
     }
 
     @Override
@@ -66,6 +71,7 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && !mNotificationManager.isNotificationPolicyAccessGranted()) {
             Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
             Toast.makeText(context, "Please allow Do Not Disturb permission", Toast.LENGTH_LONG).show();
         }
@@ -138,11 +144,29 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
                         && mNotificationManager.isNotificationPolicyAccessGranted()) {
                     setRingerMode(am, mRemoteViews, R.id.ringer_mode_tv);
                 } else {
-                    Toast.makeText(context, "Permission for notification access is required", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, "Do Not Disturb permission is required", Toast.LENGTH_SHORT).show();
                 }
                 updateUIRingerChange(am, mRemoteViews);
                 updateUINotificationChange(am, mRemoteViews);
                 updateUISystemChange(am, mRemoteViews);
+                break;
+
+            case R.id.play_previous_music:
+                changeMusicStatus(am, KeyEvent.KEYCODE_MEDIA_PREVIOUS);
+                break;
+
+            case R.id.play_music:
+                if (am.isMusicActive()) {
+                    changeMusicStatus(am, KeyEvent.KEYCODE_MEDIA_PAUSE);
+                    mRemoteViews.setImageViewResource(R.id.play_music, R.mipmap.ic_play);
+                } else {
+                    changeMusicStatus(am, KeyEvent.KEYCODE_MEDIA_PLAY);
+                    mRemoteViews.setImageViewResource(R.id.play_music, R.mipmap.ic_pause);
+                }
+                break;
+
+            case R.id.play_next_music:
+                changeMusicStatus(am, KeyEvent.KEYCODE_MEDIA_NEXT);
                 break;
 
             default:
@@ -172,7 +196,7 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
 
     }
 
-    private void changeVolume(AudioManager audioManager, int type, int volumelevel/*, RemoteViews remoteViews, int view*/) {
+    private void changeVolume(AudioManager audioManager, int type, int volumelevel) {
         audioManager.adjustStreamVolume(type, volumelevel, 0);
     }
 
@@ -306,7 +330,20 @@ public class EdgeSingleProvider extends SlookCocktailProvider {
 
         remoteViews.setOnClickPendingIntent(R.id.ring_mode_button, getClickIntent(context, R.id.ring_mode_button));
 
+        remoteViews.setOnClickPendingIntent(R.id.play_previous_music, getClickIntent(context, R.id.play_previous_music));
+
+        remoteViews.setOnClickPendingIntent(R.id.play_music, getClickIntent(context, R.id.play_music));
+
+        remoteViews.setOnClickPendingIntent(R.id.play_next_music, getClickIntent(context, R.id.play_next_music));
         return remoteViews;
+    }
+
+    private void changeMusicStatus(AudioManager am, int keyEvent) {
+        KeyEvent downEvent = new KeyEvent(KeyEvent.ACTION_DOWN, keyEvent);
+        am.dispatchMediaKeyEvent(downEvent);
+
+        KeyEvent upEvent = new KeyEvent(KeyEvent.ACTION_UP, keyEvent);
+        am.dispatchMediaKeyEvent(upEvent);
     }
 
     private PendingIntent getClickIntent(Context context, int id) {
