@@ -22,7 +22,7 @@ android {
         applicationId 'com.poojan.edge.volume.control'
         minSdkVersion 21
         targetSdkVersion 27
-        versionCode 4
+        versionCode 5
         versionName "1.4"
 
         multiDexEnabled true
